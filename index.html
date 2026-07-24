@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AsiaformS — Order Dashboard</title>
+<link rel="icon" href="assets/logo.png" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D3C7A">
+<link rel="icon" href="assets/icons/favicon.ico">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AsiaformS">
+<meta name="msapplication-TileImage" content="assets/icons/mstile-150x150.png">
+<meta name="msapplication-TileColor" content="#0D3C7A">
+<meta name="msapplication-config" content="browserconfig.xml">
+<link rel="stylesheet" href="css/pwa-extra.css">
+</head>
+<body>
+
+  <div id="pwa-splash" class="pwa-splash">
+    <img src="assets/logo.png" alt="AsiaformS" />
+    <div class="pwa-splash__bar"><div class="pwa-splash__bar-fill"></div></div>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar__row">
+      <div class="brand">
+        <div class="brand__logo-badge"><img src="assets/logo.png" alt="AsiaformS" /></div>
+        <div class="brand__text">
+          <span class="brand__title">AsiaformS</span>
+          <span class="brand__sub">Digital Order Confirmation</span>
+        </div>
+      </div>
+      <div class="topbar__actions">
+        <button id="pwa-install-btn" class="btn btn--sm btn--install">⬇ Install App</button>
+        <button class="icon-btn" data-toggle="dark-mode" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+    <div class="topbar__perforation"></div>
+  </header>
+
+  <main class="app-shell">
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__label">Total Orders</div>
+        <div class="stat-card__value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card stat-card--pending">
+        <div class="stat-card__label">Pending</div>
+        <div class="stat-card__value" id="stat-pending">0</div>
+      </div>
+      <div class="stat-card stat-card--approved">
+        <div class="stat-card__label">Approved</div>
+        <div class="stat-card__value" id="stat-approved">0</div>
+      </div>
+      <div class="stat-card stat-card--rejected">
+        <div class="stat-card__label">Rejected</div>
+        <div class="stat-card__value" id="stat-rejected">0</div>
+      </div>
+    </div>
+
+    <div class="flex-between" style="margin-bottom:16px;">
+      <h2 style="font-size:16px;">Recent Orders</h2>
+      <a href="create-order.html" class="btn btn--primary btn--sm">＋ Create Order</a>
+    </div>
+
+    <div class="toolbar">
+      <input type="search" id="search-input" placeholder="Search by customer, mobile, GSTIN or order no." />
+      <select id="filter-status">
+        <option value="All">All Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+      <select id="filter-type">
+        <option value="All">All Order Types</option>
+        <option value="common">Cannon</option>
+        <option value="newCustomer">New Customer</option>
+        <option value="regularCustomer">Regular Customer</option>
+        <option value="newProduct">New Product</option>
+        <option value="oldDesignFSBS">Old Design FS / BS</option>
+        <option value="newDesignFSBS">New Design FS / BS</option>
+        <option value="oldDesignNewFilm">Old Design / New Film</option>
+      </select>
+    </div>
+
+    <div class="flex-between" style="margin-bottom:10px;">
+      <label class="checkbox" style="font-size:12.5px;">
+        <input type="checkbox" id="select-all-checkbox" /> Select All
+      </label>
+    </div>
+
+    <div class="bulk-actions-bar" id="bulk-actions-bar" style="display:none;">
+      <span id="bulk-selected-count">0 selected</span>
+      <div class="bulk-actions-bar__buttons">
+        <button type="button" class="btn btn--soft btn--sm" id="bulk-download-btn">⬇ Download PDFs</button>
+        <button type="button" class="btn btn--danger btn--sm" id="bulk-delete-btn">Delete Selected</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="bulk-clear-btn">Clear</button>
+      </div>
+    </div>
+
+    <div class="order-list" id="order-list">
+      <!-- populated by script.js -->
+    </div>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>

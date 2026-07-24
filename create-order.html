@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AsiaformS — Create Order</title>
+<link rel="icon" href="assets/logo.png" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar__row">
+      <a href="index.html" class="back-link">← Dashboard</a>
+      <div class="topbar__actions">
+        <span class="hint" id="autosave-hint" style="color:rgba(255,255,255,0.85);"></span>
+        <button class="icon-btn" data-toggle="dark-mode" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+    <div class="topbar__perforation"></div>
+  </header>
+
+  <main class="app-shell" style="padding-top:20px;">
+
+    <div class="flex-between" style="margin-bottom:6px;">
+      <h1 style="font-size:19px;" id="page-heading">New Order Confirmation</h1>
+      <span id="order-id-badge" class="chip" style="display:none;"></span>
+    </div>
+    <p class="muted" style="font-size:13px; margin-bottom:20px;">Fill the order exactly as on the paper form. Your progress is saved automatically as a draft.</p>
+
+    <form id="order-form" novalidate>
+
+      <!-- Top Section -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">1</span> Order Type &amp; Date</div>
+        </div>
+        <div class="checkbox-row">
+          <label class="checkbox"><input type="checkbox" name="topSection.common" /> Cannon</label>
+          <label class="checkbox"><input type="checkbox" name="topSection.newCustomer" /> New Customer</label>
+          <label class="checkbox"><input type="checkbox" name="topSection.regularCustomer" /> Regular Customer</label>
+          <label class="checkbox"><input type="checkbox" name="topSection.newProduct" /> New Product</label>
+          <label class="checkbox"><input type="checkbox" name="topSection.oldDesignFSBS" /> Old Design FS / BS</label>
+          <label class="checkbox"><input type="checkbox" name="topSection.newDesignFSBS" /> New Design FS / BS</label>
+          <label class="checkbox"><input type="checkbox" name="topSection.oldDesignNewFilm" /> Old Design / New Film</label>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-date">Date</label>
+            <input type="date" id="f-date" name="topSection.date" />
+          </div>
+          <div class="field">
+            <label for="f-repname">Representative Name</label>
+            <input type="text" id="f-repname" name="topSection.repName" placeholder="e.g. Karthik R" required />
+          </div>
+        </div>
+      </section>
+
+      <!-- Customer Details -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">2</span> Customer Details</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-cname">Customer Name</label>
+            <input type="text" id="f-cname" name="customer.name" required />
+          </div>
+          <div class="field">
+            <label for="f-mobile">Mobile Number</label>
+            <input type="tel" id="f-mobile" name="customer.mobile" placeholder="10-digit mobile" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-address">Address</label>
+          <textarea id="f-address" name="customer.address" rows="2"></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-gstin">GSTIN</label>
+            <input type="text" id="f-gstin" name="customer.gstin" />
+          </div>
+          <div class="field">
+            <label for="f-mail">Mail ID</label>
+            <input type="email" id="f-mail" name="customer.mailId" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-contact">Contact Person Name</label>
+            <input type="text" id="f-contact" name="customer.contactPerson" />
+          </div>
+          <div class="field">
+            <label for="f-designation">Designation</label>
+            <input type="text" id="f-designation" name="customer.designation" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Delivery Address</label>
+          <div class="radio-pair" style="margin-bottom:8px;">
+            <label><input type="radio" name="customer.deliveryAddressType" value="Same" checked /> Same</label>
+            <label><input type="radio" name="customer.deliveryAddressType" value="Different" /> Different (Back Side)</label>
+          </div>
+          <textarea id="f-delivery-address" name="customer.deliveryAddress" rows="2" placeholder="Only needed if different from above"></textarea>
+        </div>
+      </section>
+
+      <!-- Product Details -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">3</span> Product Details</div>
+          <button type="button" class="btn btn--soft btn--sm" id="btn-add-product">+ Add Product</button>
+        </div>
+        <div id="product-list"><!-- rendered by js/create-order.js --></div>
+      </section>
+
+      <!-- Sticker Details -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">4</span> Stickers &amp; Tag Order</div>
+        </div>
+        <div class="field">
+          <label for="f-numbering">Numbering &amp; Other Details</label>
+          <textarea id="f-numbering" name="sticker.numberingDetails" rows="2"></textarea>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="f-ups">UPS</label>
+            <input type="text" id="f-ups" name="sticker.ups" />
+          </div>
+          <div class="field">
+            <label for="f-coresize">Core Size</label>
+            <input type="text" id="f-coresize" name="sticker.coreSize" />
+          </div>
+          <div class="field">
+            <label for="f-qtyroll">No. of Qty Roll</label>
+            <input type="text" id="f-qtyroll" name="sticker.qtyRoll" />
+          </div>
+        </div>
+        <div class="checkbox-row">
+          <label class="checkbox"><input type="checkbox" name="sticker.offsetType" /> Offset Type (Manual)</label>
+          <label class="checkbox"><input type="checkbox" name="sticker.barcodeType" /> Barcode Type</label>
+        </div>
+        <div class="field">
+          <label for="f-winding">Winding Direction</label>
+          <input type="text" id="f-winding" name="sticker.windingDirection" />
+        </div>
+      </section>
+
+      <!-- Rate Details -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">5</span> Rate Details</div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="f-qty">Qty</label>
+            <input type="number" id="f-qty" name="rate.qty" min="0" step="any" />
+          </div>
+          <div class="field">
+            <label for="f-rate">Rate</label>
+            <input type="number" id="f-rate" name="rate.rate" min="0" step="any" />
+          </div>
+          <div class="field">
+            <label for="f-taxable">Taxable Amount</label>
+            <input type="number" id="f-taxable" name="rate.taxableAmount" min="0" step="any" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="f-gstpercent">GST %</label>
+            <input type="number" id="f-gstpercent" name="rate.gstPercent" min="0" step="any" />
+          </div>
+          <div class="field">
+            <label for="f-gstvalue">GST Value</label>
+            <input type="number" id="f-gstvalue" name="rate.gstValue" min="0" step="any" />
+          </div>
+          <div class="field">
+            <label for="f-totalvalue">Total Value</label>
+            <input type="number" id="f-totalvalue" name="rate.totalValue" min="0" step="any" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-approxvalue">Approximate Value (+/-, as per qty)</label>
+          <input type="text" id="f-approxvalue" name="rate.approxValue" placeholder="e.g. ±2% as per actual qty" />
+        </div>
+      </section>
+
+      <!-- Transport Details -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">6</span> Transport &amp; Payment</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-freight">Freight</label>
+            <input type="text" id="f-freight" name="transport.freight" placeholder="e.g. To Pay / Paid" />
+          </div>
+          <div class="field">
+            <label for="f-transport">Transport</label>
+            <input type="text" id="f-transport" name="transport.transport" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-deliveryperiod">Delivery Period</label>
+            <input type="text" id="f-deliveryperiod" name="transport.deliveryPeriod" />
+          </div>
+          <div class="field">
+            <label for="f-paymentterms">Payment Terms</label>
+            <input type="text" id="f-paymentterms" name="transport.paymentTerms" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-lastbill">Last Bill Date</label>
+            <input type="date" id="f-lastbill" name="transport.lastBillDate" />
+          </div>
+          <div class="field">
+            <label for="f-amtrecd">Amount Received Date</label>
+            <input type="date" id="f-amtrecd" name="transport.amtRecdDate" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom checkboxes -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">7</span> Confirmation Checks</div>
+        </div>
+        <div class="checkbox-row">
+          <label class="checkbox"><input type="checkbox" name="bottomCheck.orderFormApproval" /> Order Form Approval Confirmation</label>
+          <label class="checkbox"><input type="checkbox" name="bottomCheck.waGroup" /> WhatsApp Group with Customer</label>
+          <label class="checkbox"><input type="checkbox" name="bottomCheck.orderSubmissionWA" /> Order Submission WA</label>
+        </div>
+      </section>
+
+      <!-- Remarks -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">8</span> Remarks</div>
+        </div>
+        <div class="field">
+          <textarea id="f-remarks" name="remarks" rows="3" placeholder="Any additional notes for this order"></textarea>
+        </div>
+      </section>
+
+      <!-- Signatures -->
+      <section class="card">
+        <div class="card__header">
+          <div class="card__title"><span class="num">9</span> Sign-offs</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-sign-rep">Representative Sign</label>
+            <input type="text" id="f-sign-rep" name="signatures.representative" placeholder="Type name to sign" />
+          </div>
+          <div class="field">
+            <label for="f-sign-designer">Designer Sign</label>
+            <input type="text" id="f-sign-designer" name="signatures.designer" placeholder="Type name to sign" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-sign-special">Special Approval</label>
+            <input type="text" id="f-sign-special" name="signatures.specialApproval" placeholder="Type name to sign" />
+          </div>
+          <div class="field">
+            <label for="f-sign-coordinator">Coordinator Sign</label>
+            <input type="text" id="f-sign-coordinator" name="signatures.coordinator" placeholder="Type name to sign" />
+          </div>
+        </div>
+      </section>
+
+      <div class="sticky-actions">
+        <button type="button" class="btn btn--ghost" id="btn-save-draft">Save Draft</button>
+        <button type="submit" class="btn btn--primary" id="btn-generate-link">Generate Customer Link</button>
+      </div>
+
+    </form>
+
+  </main>
+
+  <!-- Share link modal -->
+  <div class="modal-overlay" id="share-modal" style="display:none;">
+    <div class="modal">
+      <h3 class="modal__title">🔗 Customer Link Ready</h3>
+      <p class="modal__body">Share this link with the customer to review and approve the order.</p>
+      <div class="share-link-box" id="share-link-text"></div>
+      <div class="qr-wrap" id="share-qr"></div>
+      <div class="share-actions">
+        <button class="btn btn--soft btn--sm" id="btn-copy-link">📋 Copy Link</button>
+        <button class="btn btn--soft btn--sm" id="btn-whatsapp-share">💬 WhatsApp</button>
+        <button class="btn btn--soft btn--sm" id="btn-email-share">✉️ Email</button>
+        <button class="btn btn--soft btn--sm" id="btn-open-link">↗ Open Link</button>
+      </div>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--primary btn--block" id="btn-close-modal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/create-order.js"></script>
+</body>
+</html>
