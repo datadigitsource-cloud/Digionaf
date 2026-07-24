@@ -1,0 +1,118 @@
+/* =========================================================
+   pwa-extra.css — PWA chrome + enterprise polish
+   Load this AFTER your existing css/style.css. It only adds
+   new classes (update banner, install button accent, loading
+   splash, ripple, fade/slide-in, skeleton shimmer, table row
+   stagger) — nothing here overrides existing selectors.
+   ========================================================= */
+
+/* ---------------- Update-available banner ---------------- */
+
+.pwa-update-banner {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px);
+  display: flex; align-items: center; gap: 14px;
+  background: var(--ink, #0A2540); color: #fff;
+  padding: 12px 16px; border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+  font-size: 13.5px; font-weight: 600;
+  z-index: 500;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.pwa-update-banner--show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.pwa-update-banner button {
+  background: var(--primary, #1656A8); color: #fff; border: none;
+  padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 12.5px;
+  cursor: pointer;
+}
+
+/* ---------------- Install button accent ---------------- */
+
+#pwa-install-btn { display: none; } /* shown by pwa.js only when installable */
+.btn--install {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+.btn--install:hover { background: rgba(255,255,255,0.22); }
+
+/* ---------------- App loading splash ---------------- */
+
+.pwa-splash {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(135deg, #0D3C7A, #1656A8);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.pwa-splash.pwa-splash--hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.pwa-splash img {
+  width: 96px; height: 96px; border-radius: 20px; background: #fff; padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  animation: pwaSplashPop 0.6s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.pwa-splash__bar {
+  width: 160px; height: 4px; border-radius: 999px; overflow: hidden;
+  background: rgba(255,255,255,0.25);
+}
+.pwa-splash__bar-fill {
+  height: 100%; width: 40%; border-radius: 999px; background: #fff;
+  animation: pwaSplashLoad 1.1s ease-in-out infinite;
+}
+@keyframes pwaSplashPop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes pwaSplashLoad {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(60%); }
+  100% { transform: translateX(220%); }
+}
+
+/* ---------------- Fade / slide-in utilities ---------------- */
+
+.fade-in { animation: pwaFadeIn 0.4s ease both; }
+.slide-up { animation: pwaSlideUp 0.35s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+@keyframes pwaFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pwaSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Stagger helper for lists/tables: add .stagger to the container and
+   each direct child gets a slightly later fade/slide-in delay. */
+.stagger > * { animation: pwaSlideUp 0.35s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger > *:nth-child(3) { animation-delay: 0.10s; }
+.stagger > *:nth-child(4) { animation-delay: 0.14s; }
+.stagger > *:nth-child(5) { animation-delay: 0.18s; }
+.stagger > *:nth-child(n+6) { animation-delay: 0.22s; }
+
+/* ---------------- Ripple buttons ---------------- */
+
+.btn { position: relative; overflow: hidden; }
+.btn__ripple {
+  position: absolute; border-radius: 50%; background: rgba(255,255,255,0.55);
+  transform: scale(0); pointer-events: none;
+  animation: pwaRipple 0.55s ease-out;
+}
+@keyframes pwaRipple { to { transform: scale(2.6); opacity: 0; } }
+
+/* ---------------- Skeleton loader ---------------- */
+
+.skeleton {
+  position: relative; overflow: hidden;
+  background: var(--border, #DCE6F2);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: pwaShimmer 1.3s infinite;
+}
+@keyframes pwaShimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+.skeleton-row {
+  height: 78px; border-radius: 14px; margin-bottom: 10px;
+}
+
+/* ---------------- Page transition ---------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-shell { animation: pwaFadeIn 0.35s ease both; }
+}
