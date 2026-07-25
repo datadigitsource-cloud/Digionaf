@@ -6,7 +6,7 @@
 // separate from the customer-approval password in order.js. Same caveat
 // applies: this is a soft deterrent, visible in the browser's source, not
 // real security. Change it to whatever your team wants to use.
-const BULK_ACTION_PASSWORD = '1234';
+const BULK_ACTION_PASSWORD = 'Asiaformsdigital@2026';
 
 let currentTerm = '';
 let currentStatus = 'All';
