@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AsiaformS — Order Review</title>
+<link rel="icon" href="assets/logo.png" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D3C7A">
+<link rel="icon" href="assets/icons/favicon.ico">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AsiaformS">
+<link rel="stylesheet" href="css/pwa-extra.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar__row">
+      <div class="brand">
+        <img src="assets/logo-white.png" alt="AsiaformS" class="brand__logo-img" />
+        <div class="brand__text">
+          <span class="brand__title">AsiaformS</span>
+          <span class="brand__sub">Order Confirmation Message</span>
+        </div>
+      </div>
+      <!-- Deliberately NO install button here — customers should never be
+           prompted to install the app. js/pwa.js also suppresses the
+           browser's own install prompt on this page since it has no
+           #pwa-install-btn element to attach to. -->
+      <button class="icon-btn" data-toggle="dark-mode" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+    </div>
+    <div class="topbar__perforation"></div>
+  </header>
+
+  <main class="app-shell" style="padding-top:20px; max-width:720px;">
+    <div id="order-content">
+      <!-- populated by js/order.js -->
+      <div class="card text-center">
+        <p class="muted">Loading order…</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/order.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
