@@ -86,34 +86,32 @@ function shortOrderNumber(id) {
  * misconfigured timezone/clock) will always see the same date/time here.
  */
 function formatDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return "—";
+
   const d = new Date(iso);
   if (isNaN(d)) return iso;
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(d); // en-CA gives yyyy-mm-dd
-  const [yyyy, mm, dd] = parts.split('-');
-  return `${dd}-${mm}-${yyyy}`;
+
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
-/** Format an ISO datetime string to dd-mm-yyyy, hh:mm AM/PM — always in India time (Asia/Kolkata), see formatDate() above. */
 function formatDateTime(iso) {
-  if (!iso) return '—';
+  if (!iso) return "—";
+
   const d = new Date(iso);
   if (isNaN(d)) return iso;
-  const datePart = formatDate(iso);
-  const timePart = new Intl.DateTimeFormat('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
+
+  return d.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: true,
-  })
-    .format(d)
-    .replace(/am|pm/i, (m) => m.toUpperCase());
-  return `${datePart}, ${timePart}`;
+  });
 }
 
 /** Format a number as Indian currency, e.g. 1,23,456.00 */
