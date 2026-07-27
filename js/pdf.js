@@ -314,7 +314,7 @@ const PDFBuilder = {
     sectionTitle('TRANSPORT & PAYMENT');
     twoCol('Freight', order.transport.freight, 'Transport', order.transport.transport);
     twoCol('Delivery Period', order.transport.deliveryPeriod, 'Payment Terms', order.transport.paymentTerms);
-    twoCol('Last Bill Date', formatDate(order.transport.lastBillDate), 'Last Amt. Recd. Date', formatDate(order.transport.amtRecdDate));
+    twoCol('Last Bill Date', formatDate(order.transport.lastBillDate), 'Last Amount Received Date', formatDate(order.transport.amtRecdDate));
     y += 6;
 
     // ---- Remarks ----
