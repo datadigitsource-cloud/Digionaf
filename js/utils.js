@@ -79,39 +79,28 @@ function shortOrderNumber(id) {
   return 'AF-' + id.replace(/-/g, '').slice(0, 6).toUpperCase();
 }
 
-/**
- * Format an ISO date string to dd-mm-yyyy — always rendered in India
- * time (Asia/Kolkata), NOT the viewing device's own timezone. Two people
- * looking at the same stored moment on two different phones (one with a
- * misconfigured timezone/clock) will always see the same date/time here.
- */
+/** Format an ISO date string to dd-mm-yyyy */
 function formatDate(iso) {
-  if (!iso) return "—";
-
+  if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d)) return iso;
-
-  return d.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
 }
 
+/** Format an ISO datetime string to dd-mm-yyyy, hh:mm AM/PM */
 function formatDateTime(iso) {
-  if (!iso) return "—";
-
+  if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d)) return iso;
-
-  return d.toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const datePart = formatDate(iso);
+  let h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${datePart}, ${String(h).padStart(2, '0')}:${m} ${ampm}`;
 }
 
 /** Format a number as Indian currency, e.g. 1,23,456.00 */
