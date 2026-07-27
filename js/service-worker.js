@@ -11,7 +11,7 @@
      banner wired up in js/pwa.js.
    ========================================================= */
 
-const CACHE_VERSION = 'v1.2.0';
+const CACHE_VERSION = 'v1.2.1';
 const CACHE_NAME = `asiaforms-cache-${CACHE_VERSION}`;
 
 // Keep this list in sync with your actual file names. Paths are relative
