@@ -10,7 +10,7 @@ let viewOrder = null;
 // NOTE: this is a soft deterrent, not real security — the code is
 // visible in the browser's source, same as anything client-side-only.
 // Change this to whatever your team wants to use.
-const APPROVAL_PASSWORD = '1234';
+const APPROVAL_PASSWORD = 'Asiaformsdigital@2026';
 
 // True only when opened via the representative dashboard's "View" button
 // (which appends &admin=1) — never true for a customer's shared link,
