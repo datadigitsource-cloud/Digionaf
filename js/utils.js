@@ -7,60 +7,20 @@
 const qs = (sel, ctx = document) => ctx.querySelector(sel);
 const qsa = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
-/** A single blank product row for the Product Details table */
+/** A single blank product entry (used by the repeatable product list) */
 function blankProduct() {
-  return { productName: '', description: '', qty: '', rate: '', taxableAmount: '', gstPercent: '', totalAmount: '' };
-}
-
-/** Round to 2 decimals, avoiding floating-point noise like 12.000000001 */
-function round2(n) {
-  return Math.round((n + Number.EPSILON) * 100) / 100;
+  return { colour: '', productDetails: '', gsm: '', hp: '', vp: '', rollIn: '', rollOut: '' };
 }
 
 /**
- * Recalculates a product row's auto-filled amounts in place:
- * Taxable Amount = Qty × Rate, Total Amount = Taxable Amount + GST% of it.
- */
-function recalcProductRow(row) {
-  const qty = parseFloat(row.qty) || 0;
-  const rate = parseFloat(row.rate) || 0;
-  const gstPercent = parseFloat(row.gstPercent) || 0;
-  const taxable = round2(qty * rate);
-  const total = round2(taxable + (taxable * gstPercent) / 100);
-  row.taxableAmount = qty || rate ? taxable : '';
-  row.totalAmount = qty || rate ? total : '';
-  return row;
-}
-
-/** Sum of every product row's Total Amount — the order's grand total */
-function productsGrandTotal(products) {
-  return round2((products || []).reduce((sum, p) => sum + (parseFloat(p.totalAmount) || 0), 0));
-}
-
-/**
- * Ensures order.products is populated using the CURRENT table-row shape,
- * migrating a best-effort single row out of whatever older shape a saved
- * order used (the free-text product fields, and/or the old order-level
- * Rate Details block) so existing orders keep opening instead of erroring.
+ * Ensures order.products is a populated array, migrating orders saved
+ * under the old single-product shape (order.product) so existing saved
+ * orders keep working after the multi-product upgrade.
  */
 function ensureProductsArray(order) {
-  const rows = order.products;
-  const looksCurrent = Array.isArray(rows) && rows.length && rows[0] && ('productName' in rows[0] || 'qty' in rows[0]);
-  if (looksCurrent) return order;
-
-  const oldProduct = (Array.isArray(rows) && rows[0]) || order.product || {};
-  const oldRate = order.rate || {};
-  const migrated = {
-    productName: oldProduct.colour || '',
-    description: oldProduct.productDetails || '',
-    qty: oldRate.qty || '',
-    rate: oldRate.rate || '',
-    taxableAmount: oldRate.taxableAmount || '',
-    gstPercent: oldRate.gstPercent || '',
-    totalAmount: oldRate.totalValue || '',
-  };
-  const isEmpty = !migrated.productName && !migrated.description && !migrated.qty && !migrated.rate;
-  order.products = [isEmpty ? blankProduct() : migrated];
+  if (!order.products || !Array.isArray(order.products) || !order.products.length) {
+    order.products = order.product ? [order.product] : [blankProduct()];
+  }
   return order;
 }
 
