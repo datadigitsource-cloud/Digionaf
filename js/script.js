@@ -6,7 +6,7 @@
 // separate from the customer-approval password in order.js. Same caveat
 // applies: this is a soft deterrent, visible in the browser's source, not
 // real security. Change it to whatever your team wants to use.
-const BULK_ACTION_PASSWORD = '1234';
+const BULK_ACTION_PASSWORD = 'Asiaformsdigital@2026';
 
 let currentTerm = '';
 let currentStatus = 'All';
@@ -22,7 +22,6 @@ function renderStatsFrom(orders) {
 }
 
 function orderRowHtml(order) {
-  ensureProductsArray(order); // guards against older/malformed product data breaking this row
   const name = escapeHtml(order.customer?.name || 'Unnamed Customer');
   const rep = escapeHtml(order.topSection?.repName || '—');
   const rejectBtn =
@@ -44,7 +43,7 @@ function orderRowHtml(order) {
         <input type="checkbox" class="order-row__select" data-select-id="${order.id}" ${checked} aria-label="Select order" />
       </div>
       <div class="order-row__main">
-        <div class="order-row__id">${orderDisplayNumber(order)} ${statusBadge(order.status)} ${noLocationWarning}</div>
+        <div class="order-row__id">${shortOrderNumber(order.id)} ${statusBadge(order.status)} ${noLocationWarning}</div>
         <div class="order-row__name">${name}</div>
         <div class="order-row__meta">Rep: ${rep} &middot; ${formatDate(order.topSection?.date)} &middot; ${formatCurrency(productsGrandTotal(order.products))}</div>
       </div>
@@ -68,7 +67,7 @@ function filterOrders(orders) {
   if (currentTerm.trim()) {
     const t = currentTerm.trim().toLowerCase();
     result = result.filter((o) => {
-      const hay = [o.customer?.name, o.customer?.mobile, o.customer?.gstin, o.topSection?.repName, orderDisplayNumber(o), shortOrderNumber(o.id)]
+      const hay = [o.customer?.name, o.customer?.mobile, o.customer?.gstin, o.topSection?.repName, shortOrderNumber(o.id)]
         .join(' ')
         .toLowerCase();
       return hay.includes(t);
@@ -78,7 +77,7 @@ function filterOrders(orders) {
 }
 
 function currentVisibleOrders() {
-  return filterOrders(repScopedOrders(allOrders));
+  return filterOrders(allOrders);
 }
 
 function renderListFrom(orders) {
@@ -94,31 +93,14 @@ function renderListFrom(orders) {
       </div>`;
     return;
   }
-  container.innerHTML = filtered
-    .map((order) => {
-      try {
-        return orderRowHtml(order);
-      } catch (e) {
-        console.error('Skipped a row that failed to render', order?.id, e);
-        return `
-          <div class="order-row" data-id="${order?.id || ''}">
-            <div class="order-row__main">
-              <div class="order-row__id">${escapeHtml(order?.id || 'Unknown')} <span class="badge badge--rejected">Render error</span></div>
-              <div class="order-row__meta">This order's data couldn't be displayed — check the browser console for details.</div>
-            </div>
-          </div>`;
-      }
-    })
-    .join('');
+  container.innerHTML = filtered.map(orderRowHtml).join('');
   updateSelectAllCheckbox();
 }
 
 function renderAll() {
-  const scoped = repScopedOrders(allOrders);
-  renderStatsFrom(scoped);
-  renderListFrom(scoped);
+  renderStatsFrom(allOrders);
+  renderListFrom(allOrders);
   updateBulkBar();
-  updateRepIdentityUI();
 }
 
 function setLoading(isLoading) {
@@ -293,8 +275,6 @@ async function handleRowAction(action, id) {
   if (action === 'view') {
     window.location.href = `order.html?id=${encodeURIComponent(id)}&admin=1`;
   } else if (action === 'edit') {
-    const ok = await promptBulkPassword('Edit');
-    if (!ok) return;
     window.location.href = `create-order.html?id=${encodeURIComponent(id)}`;
   } else if (action === 'link') {
     const link = buildShareLink(id);
@@ -310,17 +290,13 @@ async function handleRowAction(action, id) {
       showToast('Could not generate PDF', 'error');
     }
   } else if (action === 'duplicate') {
-    const ok = await promptBulkPassword('Duplicate');
-    if (!ok) return;
     const copy = await Storage.duplicateOrder(id);
-    if (copy) showToast(`Duplicated as ${orderDisplayNumber(copy)}`, 'success');
+    if (copy) showToast(`Duplicated as ${shortOrderNumber(copy.id)}`, 'success');
     await loadOrders();
   } else if (action === 'reject') {
-    const passOk = await promptBulkPassword('Reject');
-    if (!passOk) return;
     const ok = await confirmDialog({
       title: 'Reject this order?',
-      message: `Order ${orderDisplayNumber(order)} for ${order.customer?.name || 'this customer'} will be marked as Rejected. The customer will see this if they open their link again.`,
+      message: `Order ${shortOrderNumber(id)} for ${order.customer?.name || 'this customer'} will be marked as Rejected. The customer will see this if they open their link again.`,
       confirmLabel: 'Reject Order',
       danger: true,
     });
@@ -330,11 +306,9 @@ async function handleRowAction(action, id) {
       await loadOrders();
     }
   } else if (action === 'delete') {
-    const passOk = await promptBulkPassword('Delete');
-    if (!passOk) return;
     const ok = await confirmDialog({
       title: 'Delete this order?',
-      message: `Order ${orderDisplayNumber(order)} for ${order.customer?.name || 'this customer'} will be permanently removed.`,
+      message: `Order ${shortOrderNumber(id)} for ${order.customer?.name || 'this customer'} will be permanently removed.`,
       confirmLabel: 'Delete',
       danger: true,
     });
@@ -358,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (prevStatus && prevStatus !== 'Approved' && o.status === 'Approved') {
         const who = o.customer?.name || 'Customer';
         const locNote = o.approval?.location ? '📍 Location captured.' : '⚠️ No location captured.';
-        showToast(`✅ ${who} just approved ${orderDisplayNumber(o)}. ${locNote}`, 'success', 6000);
+        showToast(`✅ ${who} just approved ${shortOrderNumber(o.id)}. ${locNote}`, 'success', 6000);
       }
     });
 
@@ -394,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       visible.forEach((o) => selectedIds.delete(o.id));
     }
-    renderListFrom(repScopedOrders(allOrders));
+    renderListFrom(allOrders);
     updateBulkBar();
   });
 
@@ -402,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#bulk-delete-btn').addEventListener('click', bulkDelete);
   qs('#bulk-clear-btn').addEventListener('click', () => {
     selectedIds.clear();
-    renderListFrom(repScopedOrders(allOrders));
+    renderListFrom(allOrders);
     updateBulkBar();
   });
 
@@ -410,69 +384,17 @@ document.addEventListener('DOMContentLoaded', () => {
     'input',
     debounce((e) => {
       currentTerm = e.target.value;
-      renderListFrom(repScopedOrders(allOrders));
+      renderListFrom(allOrders);
     }, 250)
   );
 
   qs('#filter-status').addEventListener('change', (e) => {
     currentStatus = e.target.value;
-    renderListFrom(repScopedOrders(allOrders));
+    renderListFrom(allOrders);
   });
 
   qs('#filter-type').addEventListener('change', (e) => {
     currentType = e.target.value;
-    renderListFrom(repScopedOrders(allOrders));
+    renderListFrom(allOrders);
   });
-
-  /* ---------------- Rep identity (who am I / show all) ---------------- */
-
-  function openRepNameModal() {
-    const modal = qs('#rep-name-modal');
-    const input = qs('#rep-name-input');
-    input.value = getSavedRepName();
-    modal.style.display = 'flex';
-    requestAnimationFrame(() => modal.classList.add('modal-overlay--show'));
-    setTimeout(() => input.focus(), 50);
-  }
-
-  function closeRepNameModal() {
-    const modal = qs('#rep-name-modal');
-    modal.classList.remove('modal-overlay--show');
-    setTimeout(() => {
-      modal.style.display = 'none';
-    }, 200);
-  }
-
-  function confirmRepName() {
-    const input = qs('#rep-name-input');
-    const name = input.value.trim();
-    if (!name) {
-      showToast('Please enter your name', 'error');
-      input.focus();
-      return;
-    }
-    saveRepName(name);
-    closeRepNameModal();
-    renderAll();
-  }
-
-  qs('#rep-name-save').addEventListener('click', confirmRepName);
-  qs('#rep-name-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      confirmRepName();
-    }
-  });
-  qs('#btn-change-rep').addEventListener('click', openRepNameModal);
-
-  qs('#show-all-toggle').addEventListener('change', (e) => {
-    currentShowAll = e.target.checked;
-    renderAll();
-  });
-
-  if (!getSavedRepName()) {
-    openRepNameModal();
-  } else {
-    updateRepIdentityUI();
-  }
 });
