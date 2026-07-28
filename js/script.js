@@ -8,39 +8,11 @@
 // real security. Change it to whatever your team wants to use.
 const BULK_ACTION_PASSWORD = '1234';
 
-// Local, per-device "who am I" identity — there's no login system, so this
-// is how the dashboard knows whose orders to show by default. Stored in
-// localStorage (not shared data), matched case-insensitively against each
-// order's Representative Name field.
-const REP_NAME_KEY = 'af_rep_name';
-
-function getSavedRepName() {
-  return (localStorage.getItem(REP_NAME_KEY) || '').trim();
-}
-function saveRepName(name) {
-  localStorage.setItem(REP_NAME_KEY, name.trim());
-}
-
 let currentTerm = '';
 let currentStatus = 'All';
 let currentType = 'All';
-let currentShowAll = false;
 let allOrders = [];
 let selectedIds = new Set();
-
-/** Restricts orders to the ones created by the currently identified rep, unless "Show all" is on */
-function repScopedOrders(orders) {
-  const repName = getSavedRepName();
-  if (currentShowAll || !repName) return orders;
-  const target = repName.toLowerCase();
-  return orders.filter((o) => (o.topSection?.repName || '').trim().toLowerCase() === target);
-}
-
-function updateRepIdentityUI() {
-  const repName = getSavedRepName();
-  const label = qs('#current-rep-label');
-  if (label) label.textContent = currentShowAll ? 'Everyone' : repName || '—';
-}
 
 function renderStatsFrom(orders) {
   qs('#stat-total').textContent = orders.length;
@@ -50,6 +22,7 @@ function renderStatsFrom(orders) {
 }
 
 function orderRowHtml(order) {
+  ensureProductsArray(order); // guards against older/malformed product data breaking this row
   const name = escapeHtml(order.customer?.name || 'Unnamed Customer');
   const rep = escapeHtml(order.topSection?.repName || '—');
   const rejectBtn =
@@ -121,7 +94,22 @@ function renderListFrom(orders) {
       </div>`;
     return;
   }
-  container.innerHTML = filtered.map(orderRowHtml).join('');
+  container.innerHTML = filtered
+    .map((order) => {
+      try {
+        return orderRowHtml(order);
+      } catch (e) {
+        console.error('Skipped a row that failed to render', order?.id, e);
+        return `
+          <div class="order-row" data-id="${order?.id || ''}">
+            <div class="order-row__main">
+              <div class="order-row__id">${escapeHtml(order?.id || 'Unknown')} <span class="badge badge--rejected">Render error</span></div>
+              <div class="order-row__meta">This order's data couldn't be displayed — check the browser console for details.</div>
+            </div>
+          </div>`;
+      }
+    })
+    .join('');
   updateSelectAllCheckbox();
 }
 
