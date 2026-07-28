@@ -80,14 +80,9 @@ function renderProductRows() {
 }
 
 function updateGrandTotal() {
-  const grandEl = qs('#product-grand-total');
-  const taxableEl = qs('#product-taxable-total');
-  const totalSubEl = qs('#product-total-amount-subtotal');
-  const products = currentOrder.products || [];
-  const taxableSum = round2(products.reduce((sum, p) => sum + (parseFloat(p.taxableAmount) || 0), 0));
-  if (grandEl) grandEl.textContent = formatCurrency(productsGrandTotal(products));
-  if (taxableEl) taxableEl.textContent = formatCurrency(taxableSum);
-  if (totalSubEl) totalSubEl.textContent = formatCurrency(productsGrandTotal(products));
+  const el = qs('#product-grand-total');
+  if (!el) return;
+  el.textContent = formatCurrency(productsGrandTotal(currentOrder.products));
 }
 
 /** Refresh just one row's readonly Taxable/Total cells without a full re-render (keeps focus intact) */
@@ -193,7 +188,7 @@ async function initForm() {
       qs('#page-heading').textContent = 'Edit Order Confirmation';
       const badge = qs('#order-id-badge');
       badge.style.display = 'inline-flex';
-      badge.textContent = orderDisplayNumber(existing);
+      badge.textContent = shortOrderNumber(existing.id);
       ensureProductsArray(currentOrder);
       populateForm(form, existing);
       renderProductRows();
@@ -207,10 +202,6 @@ async function initForm() {
   // New order: try to restore an autosaved draft first
   const draft = Storage.getDraft();
   currentOrder = draft?.data || Storage.blankOrder();
-  if (!draft) {
-    const savedRepName = (localStorage.getItem('af_rep_name') || '').trim();
-    if (savedRepName) currentOrder.topSection.repName = savedRepName;
-  }
   ensureProductsArray(currentOrder);
   populateForm(form, currentOrder);
   renderProductRows();
@@ -242,7 +233,7 @@ function openShareModal(order) {
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
   qs('#btn-email-share').onclick = () => {
-    const subject = encodeURIComponent(`Order Confirmation — ${orderDisplayNumber(order)}`);
+    const subject = encodeURIComponent(`Order Confirmation — ${shortOrderNumber(order.id)}`);
     const body = encodeURIComponent(`Hi ${order.customer.name || ''},\n\nPlease review and approve your order using the link below:\n${link}\n\nThank you,\n${order.topSection.repName || 'AsiaformS Team'}`);
     window.location.href = `mailto:${order.customer.mailId || ''}?subject=${subject}&body=${body}`;
   };
@@ -333,9 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving…';
     try {
-      if (!currentOrder.sequenceNumber) {
-        currentOrder.sequenceNumber = await Storage.getNextSequenceNumber();
-      }
       await Storage.saveOrder(currentOrder);
       if (!editingExisting) Storage.clearDraft();
       showToast('Order saved — link generated', 'success');
