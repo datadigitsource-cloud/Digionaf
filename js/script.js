@@ -2,10 +2,11 @@
    script.js — Dashboard (index.html) logic
    ========================================================= */
 
-// Password required before a BULK download or bulk delete goes through —
-// separate from the customer-approval password in order.js. Same caveat
-// applies: this is a soft deterrent, visible in the browser's source, not
-// real security. Change it to whatever your team wants to use.
+// Password required before a BULK download/delete, and before individual
+// row actions (Edit, Duplicate, Reject, Delete) go through — separate from
+// the customer-approval password in order.js. Same caveat applies: this is
+// a soft deterrent, visible in the browser's source, not real security.
+// Change it to whatever your team wants to use.
 const BULK_ACTION_PASSWORD = 'Asiaformsdigital@2026';
 
 let currentTerm = '';
@@ -169,7 +170,8 @@ function updateBulkBar() {
 }
 
 /**
- * Password-confirmation modal for bulk download/delete — mirrors the
+ * Password-confirmation modal — used for bulk download/delete AND for
+ * individual row actions (Edit, Duplicate, Reject, Delete). Mirrors the
  * approval-password pattern used on the customer page in order.js.
  */
 function promptBulkPassword(actionLabel) {
@@ -275,6 +277,8 @@ async function handleRowAction(action, id) {
   if (action === 'view') {
     window.location.href = `order.html?id=${encodeURIComponent(id)}&admin=1`;
   } else if (action === 'edit') {
+    const ok = await promptBulkPassword('Edit');
+    if (!ok) return;
     window.location.href = `create-order.html?id=${encodeURIComponent(id)}`;
   } else if (action === 'link') {
     const link = buildShareLink(id);
@@ -290,10 +294,14 @@ async function handleRowAction(action, id) {
       showToast('Could not generate PDF', 'error');
     }
   } else if (action === 'duplicate') {
+    const okDup = await promptBulkPassword('Duplicate');
+    if (!okDup) return;
     const copy = await Storage.duplicateOrder(id);
     if (copy) showToast(`Duplicated as ${shortOrderNumber(copy.id)}`, 'success');
     await loadOrders();
   } else if (action === 'reject') {
+    const okPw = await promptBulkPassword('Reject');
+    if (!okPw) return;
     const ok = await confirmDialog({
       title: 'Reject this order?',
       message: `Order ${shortOrderNumber(id)} for ${order.customer?.name || 'this customer'} will be marked as Rejected. The customer will see this if they open their link again.`,
@@ -306,6 +314,8 @@ async function handleRowAction(action, id) {
       await loadOrders();
     }
   } else if (action === 'delete') {
+    const okPw = await promptBulkPassword('Delete');
+    if (!okPw) return;
     const ok = await confirmDialog({
       title: 'Delete this order?',
       message: `Order ${shortOrderNumber(id)} for ${order.customer?.name || 'this customer'} will be permanently removed.`,
