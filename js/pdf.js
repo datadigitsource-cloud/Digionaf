@@ -104,29 +104,7 @@ const PDFBuilder = {
       y += rowH;
     });
 
-    // Column-total row — Taxable Amount and Total Amount subtotals, each
-    // aligned directly under their own column (page-break safe).
-    if (y + 20 > 770) {
-      doc.addPage();
-      y = 40;
-      drawHeader();
-    }
-    const taxableSum = round2(products.reduce((sum, p) => sum + (parseFloat(p.taxableAmount) || 0), 0));
-    doc.setFillColor(232, 240, 250);
-    doc.rect(margin, y, tableW, 18, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(13, 60, 122);
-    doc.text('COLUMN TOTAL', colX(0) + 4, y + 12, { align: 'left' });
-    doc.text(this._money(taxableSum), colX(5) + cols[5].width - 4, y + 12, { align: 'right' });
-    doc.text(this._money(productsGrandTotal(products)), colX(7) + cols[7].width - 4, y + 12, { align: 'right' });
-    y += 18;
-
     // Grand total row
-    if (y + 28 > 790) {
-      doc.addPage();
-      y = 40;
-    }
     const grandTotal = productsGrandTotal(products);
     doc.setFillColor(13, 60, 122);
     doc.rect(margin, y, tableW, 20, 'F');
@@ -245,7 +223,7 @@ const PDFBuilder = {
     doc.text('ORDER CONFIRMATION', pageW - margin, 38, { align: 'right' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Order No: ${orderDisplayNumber(order)}`, pageW - margin, 56, { align: 'right' });
+    doc.text(`Order No: ${shortOrderNumber(order.id)}`, pageW - margin, 56, { align: 'right' });
     doc.text(`Date: ${formatDate(order.topSection.date)}`, pageW - margin, 70, { align: 'right' });
 
     y = 106;
@@ -283,33 +261,17 @@ const PDFBuilder = {
       const colStartLeft = margin + 8;
       const colStartRight = margin + half + 8;
 
-      // Truncates text with an ellipsis if it would run past maxWidth,
-      // so a long value can never visually collide with the next column.
-      const fitText = (text, maxWidth) => {
-        const str = String(text || '—');
-        if (doc.getTextWidth(str) <= maxWidth) return str;
-        let truncated = str;
-        while (truncated.length > 1 && doc.getTextWidth(`${truncated}…`) > maxWidth) {
-          truncated = truncated.slice(0, -1);
-        }
-        return `${truncated}…`;
-      };
-
       doc.setFont('helvetica', 'bold');
       doc.text(`${leftLabel}:`, colStartLeft, y);
       const leftLabelW = doc.getTextWidth(`${leftLabel}: `);
-      const leftValueX = colStartLeft + leftLabelW + 6;
-      const leftMaxWidth = colStartRight - leftValueX - 10;
       doc.setFont('helvetica', 'normal');
-      doc.text(fitText(leftVal, leftMaxWidth), leftValueX, y);
+      doc.text(String(leftVal || '—'), colStartLeft + leftLabelW + 6, y);
 
       doc.setFont('helvetica', 'bold');
       doc.text(`${rightLabel}:`, colStartRight, y);
       const rightLabelW = doc.getTextWidth(`${rightLabel}: `);
-      const rightValueX = colStartRight + rightLabelW + 6;
-      const rightMaxWidth = pageW - margin - rightValueX;
       doc.setFont('helvetica', 'normal');
-      doc.text(fitText(rightVal, rightMaxWidth), rightValueX, y);
+      doc.text(String(rightVal || '—'), colStartRight + rightLabelW + 6, y);
 
       y += 18;
     };
@@ -329,12 +291,9 @@ const PDFBuilder = {
 
     // ---- Customer Information ----
     sectionTitle('CUSTOMER INFORMATION');
-    const nameLines = row('Customer', order.customer.name, pageW - margin * 2);
-    y += Math.max(16, nameLines * 12);
-    twoCol('GSTIN', order.customer.gstin, 'Mobile', order.customer.mobile);
-    twoCol('Mail ID', order.customer.mailId, 'Contact Person', order.customer.contactPerson);
-    const designationLines = row('Designation', order.customer.designation, pageW - margin * 2);
-    y += Math.max(16, designationLines * 12);
+    twoCol('Customer', order.customer.name, 'Mobile', order.customer.mobile);
+    twoCol('GSTIN', order.customer.gstin, 'Mail ID', order.customer.mailId);
+    twoCol('Contact Person', order.customer.contactPerson, 'Designation', order.customer.designation);
     const addrLines = row('Address', order.customer.address, pageW - margin * 2);
     y += Math.max(16, addrLines * 12);
     const delivAddr = order.customer.deliveryAddressType === 'Same' ? 'Same as above' : order.customer.deliveryAddress;
@@ -355,7 +314,7 @@ const PDFBuilder = {
     sectionTitle('TRANSPORT & PAYMENT');
     twoCol('Freight', order.transport.freight, 'Transport', order.transport.transport);
     twoCol('Delivery Period', order.transport.deliveryPeriod, 'Payment Terms', order.transport.paymentTerms);
-    twoCol('Last Bill Date', formatDate(order.transport.lastBillDate), 'Last Amt. Recd. Date', formatDate(order.transport.amtRecdDate));
+    twoCol('Last Bill Date', formatDate(order.transport.lastBillDate), 'Last Amount Received Date', formatDate(order.transport.amtRecdDate));
     y += 6;
 
     // ---- Remarks ----
@@ -472,6 +431,6 @@ const PDFBuilder = {
   /** Build the PDF and trigger a browser download */
   async downloadPdf(order, shareLink) {
     const doc = await this.build(order, shareLink);
-    doc.save(`OrderConfirmation_${orderDisplayNumber(order)}.pdf`);
+    doc.save(`OrderConfirmation_${shortOrderNumber(order.id)}.pdf`);
   },
 };
