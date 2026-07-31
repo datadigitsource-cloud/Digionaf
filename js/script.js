@@ -12,6 +12,8 @@ const BULK_ACTION_PASSWORD = 'Asiaformsdigital@2026';
 let currentTerm = '';
 let currentStatus = 'All';
 let currentType = 'All';
+let currentDateFrom = '';
+let currentDateTo = '';
 let allOrders = [];
 let selectedIds = new Set();
 
@@ -65,6 +67,18 @@ function filterOrders(orders) {
   let result = orders;
   if (currentStatus !== 'All') result = result.filter((o) => o.status === currentStatus);
   if (currentType !== 'All') result = result.filter((o) => o.topSection?.[currentType]);
+  if (currentDateFrom) {
+    result = result.filter((o) => {
+      const d = o.topSection?.date;
+      return !!d && d >= currentDateFrom;
+    });
+  }
+  if (currentDateTo) {
+    result = result.filter((o) => {
+      const d = o.topSection?.date;
+      return !!d && d <= currentDateTo;
+    });
+  }
   if (currentTerm.trim()) {
     const t = currentTerm.trim().toLowerCase();
     result = result.filter((o) => {
@@ -405,6 +419,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   qs('#filter-type').addEventListener('change', (e) => {
     currentType = e.target.value;
+    renderListFrom(allOrders);
+  });
+
+  qs('#filter-date-from').addEventListener('change', (e) => {
+    currentDateFrom = e.target.value;
+    renderListFrom(allOrders);
+  });
+
+  qs('#filter-date-to').addEventListener('change', (e) => {
+    currentDateTo = e.target.value;
+    renderListFrom(allOrders);
+  });
+
+  qs('#btn-clear-date-filter').addEventListener('click', () => {
+    currentDateFrom = '';
+    currentDateTo = '';
+    qs('#filter-date-from').value = '';
+    qs('#filter-date-to').value = '';
     renderListFrom(allOrders);
   });
 });
